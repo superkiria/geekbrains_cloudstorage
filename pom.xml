@@ -11,6 +11,7 @@
     <modules>
         <module>geekbrains-cloudstorage-client</module>
         <module>geekbrains-cloudstorage-server</module>
+        <module>geekbrains-cloudstorage-utils</module>
     </modules>
 
     <properties>
