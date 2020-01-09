@@ -15,12 +15,37 @@ public class MessageProcessor {
     private static final String FOLDER = "server_storage/";
 
     public static AbstractMessage process(AbstractMessage incomingMessage) {
-        if (incomingMessage instanceof AuthenticationMessage) {
-            return processCertainTypeMessage((AuthenticationMessage) incomingMessage);
+        if (incomingMessage instanceof ProcessingMessage) {
+            if (incomingMessage.isAuthenticationMessage()) {
+                AuthenticationMessage authenticationMessage = (AuthenticationMessage) incomingMessage;
+                String token = null;
+                try {
+                    token = DatabaseServer.getToken(authenticationMessage.getLogin(), authenticationMessage.getPassword());
+                } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                    return new LogMessage("Unexpected error");
+                }
+                return new TokenMessage(token);
+            }
+            String operatingFolderPath;
+            try {
+                String userFolderName = DatabaseServer.getFolderNameForToken(incomingMessage.getToken());
+                if (userFolderName == null) {
+                    return new LogMessage("No authentication");
+                }
+                operatingFolderPath = FOLDER + userFolderName;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return new LogMessage("Unexpected error");
+            }
+            MessageProcessingContext messageProcessingContext = new MessageProcessingContext(operatingFolderPath);
+            MessageProcessingResult result = ((ProcessingMessage) incomingMessage).processOnServer(messageProcessingContext);
+            if (result != null) {
+                return result.getAnswerMessage();
+            }
+            return new LogMessage("Unexpected error");
         }
-        if (incomingMessage instanceof LogMessage) {
-            return processCertainTypeMessage((LogMessage) incomingMessage);
-        }
+
         String folder = null;
         try {
             folder = DatabaseServer.getFolderNameForToken(incomingMessage.getToken());
@@ -39,9 +64,6 @@ public class MessageProcessor {
                 return new LogMessage("Unexpected error");
             }
         }
-        if (incomingMessage instanceof FileRemoveRequestMessage) {
-            return processCertainTypeMessage((FileRemoveRequestMessage) incomingMessage, folder);
-        }
         if (incomingMessage instanceof FileRequestMessage) {
             return processCertainTypeMessage((FileRequestMessage) incomingMessage, folder);
         }
@@ -49,17 +71,6 @@ public class MessageProcessor {
             return processCertainTypeMessage((FileMessage) incomingMessage, folder);
         }
         return new LogMessage("Not valid message");
-    }
-
-    private static AbstractMessage processCertainTypeMessage(AuthenticationMessage message) {
-        TokenMessage tokenMessage = new TokenMessage();
-        try {
-            tokenMessage.setToken(DatabaseServer.getToken(message.getLogin(), message.getPassword()));
-        } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return new LogMessage("Unexpected error");
-        }
-        return tokenMessage;
     }
 
     private static AbstractMessage processCertainTypeMessage(FileRequestMessage message, String folder) {
@@ -75,11 +86,6 @@ public class MessageProcessor {
         return new LogMessage("No such file found");
     }
 
-    private static AbstractMessage processCertainTypeMessage(LogMessage message) {
-        System.out.println(message.getRecord());
-        return new LogMessage("The log message was received");
-    }
-
     private static AbstractMessage processCertainTypeMessage(FileMessage message, String folder) {
         try {
             Files.write(Paths.get(FOLDER + folder + "/" + message.getFilename()), message.getData(), StandardOpenOption.CREATE);
@@ -89,17 +95,5 @@ public class MessageProcessor {
         }
         return new LogMessage("The file was saved: " + message.getFilename());
     }
-
-    private static AbstractMessage processCertainTypeMessage(FileRemoveRequestMessage message, String folder) {
-        try {
-            Files.deleteIfExists(Paths.get(FOLDER + folder + "/" + message.getFilename()));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new LogMessage("No authentication");
-        }
-        return new LogMessage("The file was removed: " + message.getFilename());
-    }
-
-
 
 }
