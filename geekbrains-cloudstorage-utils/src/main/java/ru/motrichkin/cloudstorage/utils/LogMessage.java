@@ -11,9 +11,6 @@ public class LogMessage extends AbstractMessage implements ProcessingMessage {
         return this.record;
     }
 
-    public void setRecord(String record) {
-        this.record = record;
-    }
 
     @Override
     public MessageProcessingResult processOnServer(MessageProcessingContext messageProcessingContext) {
@@ -23,7 +20,7 @@ public class LogMessage extends AbstractMessage implements ProcessingMessage {
 
     @Override
     public MessageProcessingResult processOnClient(MessageProcessingContext messageProcessingContext) {
-        System.out.println(this.getRecord());
+        System.out.println("Server: " + this.getRecord());
         return new MessageProcessingResult();
     }
 }

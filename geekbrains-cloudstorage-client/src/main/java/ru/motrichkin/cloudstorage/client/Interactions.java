@@ -7,21 +7,20 @@ import java.nio.file.Paths;
 
 public class Interactions {
 
-    private static void receiveMessage() {
+    private static MessageProcessingResult receiveMessage() {
+        AbstractMessage message = null;
         try {
-            Object object = Network.readObject();
-            ClientMessageProcessor.process((AbstractMessage) object);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            message = Network.readObject();
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
+        return ClientMessageProcessor.process(message);
     }
 
-    public static void authentificate(String login, String password) {
+    public static boolean authenticate(String login, String password) {
         AuthenticationMessage authenticationMessage = new AuthenticationMessage(login, password);
         Network.sendMessage(authenticationMessage);
-        receiveMessage();
+        return receiveMessage().getNewToken() != null;
     }
 
 
@@ -44,6 +43,16 @@ public class Interactions {
     public static void receiveFile(String fileName) {
         FileRequestMessage fileRequestMessage = new FileRequestMessage(fileName);
         Network.sendMessage(fileRequestMessage);
+        receiveMessage();
+    }
+
+    public static void receiveFilesList() {
+        Network.sendMessage(new FilesListRequestMessage());
+        receiveMessage();
+    }
+
+    public static void renameFile(String oldName, String newName) {
+        Network.sendMessage(new FileRenameRequestMessage(oldName, newName));
         receiveMessage();
     }
 

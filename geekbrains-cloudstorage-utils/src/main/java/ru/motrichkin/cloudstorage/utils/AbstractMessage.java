@@ -14,8 +14,8 @@ public abstract class AbstractMessage implements Serializable {
         return this.token;
     }
 
-    protected void setAuthenticationMessage(boolean authenticationMessage) {
-        isAuthenticationMessage = authenticationMessage;
+    protected void setAuthenticationMessage() {
+        isAuthenticationMessage = true;
     }
 
     public boolean isAuthenticationMessage() {

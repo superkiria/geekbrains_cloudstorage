@@ -18,7 +18,7 @@ public class FileRemoveRequestMessage extends AbstractMessage implements Process
     @Override
     public MessageProcessingResult processOnServer(MessageProcessingContext messageProcessingContext) {
         try {
-            Files.deleteIfExists(Paths.get(messageProcessingContext.getOperatingFolder() + this.getFilename()));
+            Files.deleteIfExists(Paths.get(messageProcessingContext.getOperatingFolder() + "/" + this.getFilename()));
         } catch (IOException e) {
             e.printStackTrace();
             return new MessageProcessingResult(new LogMessage("No authentication"));

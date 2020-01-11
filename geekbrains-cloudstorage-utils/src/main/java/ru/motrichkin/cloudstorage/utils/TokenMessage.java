@@ -13,7 +13,9 @@ public class TokenMessage extends AbstractMessage implements ProcessingMessage {
 
     @Override
     public MessageProcessingResult processOnClient(MessageProcessingContext context) {
-        System.out.println("Token: " + this.getToken());
-        return new MessageProcessingResult();
+        System.out.println("Token received");
+        MessageProcessingResult messageProcessingResult = new MessageProcessingResult();
+        messageProcessingResult.setNewToken(this.getToken());
+        return messageProcessingResult;
     }
 }
