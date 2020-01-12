@@ -30,6 +30,7 @@ public class FileRequestMessage extends AbstractMessage implements ProcessingMes
         return new MessageProcessingResult(new LogMessage("No such file found"));
     }
 
+
     @Override
     public MessageProcessingResult processOnClient(MessageProcessingContext messageProcessingContext) {
         return null;

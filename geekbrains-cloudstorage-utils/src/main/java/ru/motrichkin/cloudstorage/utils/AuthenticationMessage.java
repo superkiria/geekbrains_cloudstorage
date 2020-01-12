@@ -1,6 +1,6 @@
 package ru.motrichkin.cloudstorage.utils;
 
-public class AuthenticationMessage extends AbstractMessage implements ProcessingMessage {
+public class AuthenticationMessage extends AbstractMessage {
 
     private String login;
     private String password;
@@ -19,13 +19,4 @@ public class AuthenticationMessage extends AbstractMessage implements Processing
         return login;
     }
 
-    @Override
-    public MessageProcessingResult processOnServer(MessageProcessingContext messageProcessingContext) {
-        throw new RuntimeException("Method not supported exception");
-    }
-
-    @Override
-    public MessageProcessingResult processOnClient(MessageProcessingContext messageProcessingContext) {
-        throw new RuntimeException("Method not supported exception");
-    }
 }

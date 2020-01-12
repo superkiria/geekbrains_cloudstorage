@@ -17,7 +17,7 @@ public class Network {
         try {
             socket = new Socket("localhost", 8189);
             out = new ObjectEncoderOutputStream(socket.getOutputStream());
-            in = new ObjectDecoderInputStream(socket.getInputStream(), 50 * 1024 * 1024);
+            in = new ObjectDecoderInputStream(socket.getInputStream(), 5 * 1024 * 1024);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,8 +53,8 @@ public class Network {
     }
 
     public static AbstractMessage readObject() throws ClassNotFoundException, IOException {
-        Object obj = in.readObject();
-        return (AbstractMessage) obj;
+        Object object = in.readObject();
+        return (AbstractMessage) object;
     }
 
     public static void setToken(String tokenToBeSet) {

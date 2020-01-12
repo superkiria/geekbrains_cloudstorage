@@ -39,7 +39,7 @@ public class ConsoleClient {
             }
 
             String[] words = line.split(" ");
-            if (words.length == 0) {
+            if (words[0].length() == 0) {
                 continue;
             }
 
@@ -69,7 +69,7 @@ public class ConsoleClient {
             }
 
             if (!hasProperNumberOfArguments) {
-                out.println("Wrong argument number");
+                out.println("Wrong amount of arguments");
                 continue;
             }
             switch (commandChar) {
