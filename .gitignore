@@ -1,3 +1,9 @@
+# No custom folders
+server_storage
+
+# No DB
+*.db
+
 # No idea
 .idea/
 

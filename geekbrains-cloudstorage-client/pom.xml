@@ -11,5 +11,12 @@
 
     <artifactId>geekbrains-cloudstorage-client</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>ru.motrichkin</groupId>
+            <artifactId>geekbrains-cloudstorage-utils</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 </project>
