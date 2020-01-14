@@ -1,3 +1,6 @@
+# No test files
+*.a
+
 # No custom folders
 server_storage
 

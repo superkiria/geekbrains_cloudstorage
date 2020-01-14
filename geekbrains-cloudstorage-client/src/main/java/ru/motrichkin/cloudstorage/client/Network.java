@@ -1,64 +1,58 @@
 package ru.motrichkin.cloudstorage.client;
 
-import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
-import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import ru.motrichkin.cloudstorage.utils.AbstractMessage;
 
-import java.io.IOException;
-import java.net.Socket;
 
 public class Network {
-    private static Socket socket;
-    private static ObjectEncoderOutputStream out;
-    private static ObjectDecoderInputStream in;
-    private static String token;
+    private static String token = null;
+    private static NioEventLoopGroup workerGroup;
+    private static Bootstrap bootstrap;
+    private static Channel channel;
+
 
     public static void start() {
-        try {
-            socket = new Socket("localhost", 8189);
-            out = new ObjectEncoderOutputStream(socket.getOutputStream());
-            in = new ObjectDecoderInputStream(socket.getInputStream(), 5 * 1024 * 1024);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        workerGroup = new NioEventLoopGroup();
+        bootstrap = new Bootstrap();
+        bootstrap.group(workerGroup);
+        bootstrap.channel(NioSocketChannel.class);
+        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            public void initChannel(SocketChannel ch) throws Exception {
+                ch.pipeline().addLast(
+                        new ClientBytesToFilesAndMessagesDecoder(),
+                        new ClientFilesAndMessagesToBytesEncoder(),
+                        new ClientMainHandler()
+                );
+            }
+        });
+        ChannelFuture channelFuture = bootstrap.connect("localhost", 8189);
+        channel = channelFuture.channel();
     }
 
     public static void stop() {
-        try {
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            in.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
-    public static boolean sendMessage(AbstractMessage message) {
-        try {
-            message.setToken(token);
-            out.writeObject(message);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public static AbstractMessage readObject() throws ClassNotFoundException, IOException {
-        Object object = in.readObject();
-        return (AbstractMessage) object;
+    public static void sendMessage(AbstractMessage message) {
+        channel.writeAndFlush(message);
     }
 
     public static void setToken(String tokenToBeSet) {
         token = tokenToBeSet;
+    }
+
+    protected static boolean hasToken() {
+        return token != null;
+    }
+
+    protected static String getToken() {
+        return token;
     }
 
 }

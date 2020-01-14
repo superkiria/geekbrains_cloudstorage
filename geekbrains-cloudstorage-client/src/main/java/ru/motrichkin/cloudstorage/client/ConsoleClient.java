@@ -11,8 +11,7 @@ public class ConsoleClient {
     public static void main(String[] args) {
         Network.start();
         Scanner in = new Scanner(System.in);
-        boolean authenticated = false;
-        while (!authenticated) {
+        //while (!Network.hasToken()) {
             out.print("Login: ");
             String login = in.nextLine();
             out.print("Password: ");
@@ -22,9 +21,8 @@ public class ConsoleClient {
             } else {
                 password = in.nextLine();
             }
-
-            authenticated = Interactions.authenticate(login, password);
-        }
+            Interactions.authenticate(login, password);
+        //}
 
         String line;
         boolean doesntWantToQuit = true;
