@@ -3,6 +3,7 @@ package ru.motrichkin.cloudstorage.client;
 import ru.motrichkin.cloudstorage.utils.*;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Paths;
 
 public class Interactions {
@@ -26,12 +27,20 @@ public class Interactions {
 
     public static void sendFile(String fileName) {
         try {
-            FileMessage fileMessage = new FileMessage(Paths.get(fileName));
-            Network.sendMessage(fileMessage);
+            RandomAccessFile file = new RandomAccessFile(fileName, "r");
+            FileMessage fileMessage;
+            int pos = 0;
+            while (pos < file.length()) {
+                int increment = Math.min(256, (int) file.length() - pos);
+                fileMessage = new FileMessage(Paths.get(fileName), pos, increment, file.length());
+                Network.sendMessage(fileMessage);
+                receiveMessage();
+                pos += increment;
+                System.out.println(pos);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        receiveMessage();
     }
 
     public static void removeFile(String fileName) {

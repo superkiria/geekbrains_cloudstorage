@@ -9,6 +9,9 @@ import java.nio.file.StandardOpenOption;
 public class FileMessage extends AbstractMessage implements ProcessingMessage {
     private String filename;
     private byte[] data;
+    private int position;
+    private int length;
+    private long fileSize;
 
     public String getFilename() {
         return filename;
@@ -23,16 +26,31 @@ public class FileMessage extends AbstractMessage implements ProcessingMessage {
         data = Files.readAllBytes(path);
     }
 
+    public FileMessage(Path path, int position, int length, long fileSize) throws IOException {
+        filename = path.getFileName().toString();
+        this.position = position;
+        this.length = length;
+        this.fileSize = fileSize;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
     @Override
     public MessageProcessingResult processOnServer(MessageProcessingContext messageProcessingContext) {
-        String operatingFolder = messageProcessingContext.getOperatingFolder();
-        try {
-            Files.write(Paths.get(operatingFolder + "/" + this.getFilename()), this.getData(), StandardOpenOption.CREATE);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new MessageProcessingResult(new LogMessage("Unexpected error"));
-        }
-        return new MessageProcessingResult(new LogMessage("The file was saved: " + this.getFilename()));
+//        String operatingFolder = messageProcessingContext.getOperatingFolder();
+//        try {
+//            Files.write(Paths.get(operatingFolder + "/" + this.getFilename()), this.getData(), StandardOpenOption.CREATE);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return new MessageProcessingResult(new LogMessage("Unexpected error"));
+//        }
+        return new MessageProcessingResult(new LogMessage(this.getFilename() + ": " + ((this.position + this.length) * 100 / this.fileSize) + "%"));
     }
 
     @Override
