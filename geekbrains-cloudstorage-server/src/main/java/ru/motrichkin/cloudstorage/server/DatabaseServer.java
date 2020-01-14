@@ -21,7 +21,7 @@ public class DatabaseServer {
     public static void connect() throws SQLException {
         try {
             Class.forName(DB_Driver);
-            connection = DriverManager.getConnection(DB_URL, "sa", "");
+            connection = DriverManager.getConnection(DB_URL);
             statement = connection.createStatement();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();

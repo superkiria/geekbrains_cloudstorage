@@ -1,4 +1,4 @@
-package ru.motrichkin.cloudstorage.server;
+package ru.motrichkin.cloudstorage.client;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class BytesToFilesAndMessagesDecoder extends ByteToMessageDecoder {
+public class ClientBytesToFilesAndMessagesDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         if (in.readableBytes() >= 8) {
@@ -25,13 +25,13 @@ public class BytesToFilesAndMessagesDecoder extends ByteToMessageDecoder {
                 Object message = (new ObjectDecoderInputStream(new ByteArrayInputStream(data))).readObject();
                 if (fileSize > 0) {
                     FileMessage fileMessage = (FileMessage) message;
-                    String filePath = "server_storage/" + DatabaseServer.getFolderNameForToken(fileMessage.getToken()) + "/" + fileMessage.getFilename();
+                    String filePath = fileMessage.getFilename();
                     if (fileMessage.getPosition() == 0) {
                         Files.deleteIfExists(Paths.get(filePath));
                     }
                     RandomAccessFile file = new RandomAccessFile(filePath, "rw");
                     file.seek(fileMessage.getPosition());
-                    for (int i = 0; i < fileSize; i++) {
+                    for (int i = 0; i < fileSize; i++) { //как избавиться от цикла?
                         file.write(in.readByte());
                     }
                     file.close();
