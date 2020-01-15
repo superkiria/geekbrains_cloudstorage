@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 
 public class FilesAndMessagesToBytesEncoder extends MessageToByteEncoder {
 
-    private static byte[] ZERO = ByteBuffer.allocate(4).putInt(0).array();
+    private final static byte[] ZERO = ByteBuffer.allocate(4).putInt(0).array();
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Object message, ByteBuf out) throws Exception {
@@ -33,6 +33,7 @@ public class FilesAndMessagesToBytesEncoder extends MessageToByteEncoder {
             for (int i = 0; i < fileMessage.getLength(); i++) {
                 out.writeByte(file.readByte());
             }
+            file.close();
         } else {
             out.writeBytes(ZERO);
             out.writeBytes(data);

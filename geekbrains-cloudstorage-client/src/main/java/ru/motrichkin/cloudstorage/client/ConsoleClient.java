@@ -27,7 +27,7 @@ public class ConsoleClient {
         String line;
         boolean doesntWantToQuit = true;
         while (doesntWantToQuit) {
-             line = in.nextLine().trim().toLowerCase();
+            line = in.nextLine().trim().toLowerCase();
             boolean flag = true;
             while (flag) {
                 int lineSize = line.length();

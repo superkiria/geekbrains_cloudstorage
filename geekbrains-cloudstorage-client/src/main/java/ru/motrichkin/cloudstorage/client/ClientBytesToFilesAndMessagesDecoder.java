@@ -40,10 +40,7 @@ public class ClientBytesToFilesAndMessagesDecoder extends ByteToMessageDecoder {
                 in.discardReadBytes();
             } else {
                 in.resetReaderIndex();
-                return;
             }
-        } else {
-            return;
         }
     }
 

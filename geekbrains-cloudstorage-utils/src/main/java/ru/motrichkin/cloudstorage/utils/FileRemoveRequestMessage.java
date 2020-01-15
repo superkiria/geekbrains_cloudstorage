@@ -21,7 +21,7 @@ public class FileRemoveRequestMessage extends AbstractMessage implements Process
             Files.deleteIfExists(Paths.get(messageProcessingContext.getOperatingFolder() + "/" + this.getFilename()));
         } catch (IOException e) {
             e.printStackTrace();
-            return new MessageProcessingResult(new LogMessage("No authentication"));
+            return new MessageProcessingResult(new LogMessage("Unexpected error"));
         }
         return new MessageProcessingResult(new LogMessage("The file was removed: " + this.getFilename()));
     }

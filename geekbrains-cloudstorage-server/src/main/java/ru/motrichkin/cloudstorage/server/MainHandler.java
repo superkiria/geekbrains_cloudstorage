@@ -26,13 +26,15 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
                         FileMessage fileMessage;
                         long pos = 0;
                         while (pos < file.length()) {
-                            long increment = Math.min(256, file.length() - pos);
+                            long increment = Math.min(1024, file.length() - pos);
                             fileMessage = new FileMessage(Paths.get(fileName), pos, increment, file.length(), operatingFolder);
                             channelHandlerContext.writeAndFlush(fileMessage);
                             pos += increment;
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } finally {
+                        file.close();
                     }
                 } else {
                     channelHandlerContext.writeAndFlush(new LogMessage("No such file found"));
