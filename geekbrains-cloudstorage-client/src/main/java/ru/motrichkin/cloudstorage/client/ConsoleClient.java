@@ -11,7 +11,7 @@ public class ConsoleClient {
     public static void main(String[] args) {
         Network.start();
         Scanner in = new Scanner(System.in);
-        //while (!Network.hasToken()) {
+        while (!Network.hasToken()) {
             out.print("Login: ");
             String login = in.nextLine();
             out.print("Password: ");
@@ -22,13 +22,12 @@ public class ConsoleClient {
                 password = in.nextLine();
             }
             Interactions.authenticate(login, password);
-        //}
-
+        }
+        System.out.println("Use only one letter for: show [l]ist of your files, [u]pload, [d]ownload, re[m]ove, re[n]ame, [q]uit");
         String line;
         boolean doesntWantToQuit = true;
         while (doesntWantToQuit) {
-            System.out.println("Use only one letter for: show [l]ist of your files, [u]pload, [d]ownload, re[m]ove, re[n]ame, [q]uit");
-            line = in.nextLine().trim().toLowerCase();
+             line = in.nextLine().trim().toLowerCase();
             boolean flag = true;
             while (flag) {
                 int lineSize = line.length();
@@ -90,8 +89,6 @@ public class ConsoleClient {
                     doesntWantToQuit = false;
                     break;
             }
-
-
         }
         Network.stop();
     }

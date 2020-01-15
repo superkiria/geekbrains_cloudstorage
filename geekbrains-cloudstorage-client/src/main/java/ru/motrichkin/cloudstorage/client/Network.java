@@ -37,6 +37,7 @@ public class Network {
     }
 
     public static void stop() {
+        workerGroup.shutdownGracefully();
     }
 
     public static void sendMessage(AbstractMessage message) {
