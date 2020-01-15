@@ -8,6 +8,7 @@ import ru.motrichkin.cloudstorage.utils.FileMessage;
 
 import java.io.ByteArrayInputStream;
 import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -30,10 +31,9 @@ public class BytesToFilesAndMessagesDecoder extends ByteToMessageDecoder {
                         Files.deleteIfExists(Paths.get(filePath));
                     }
                     RandomAccessFile file = new RandomAccessFile(filePath, "rw");
-                    file.seek(fileMessage.getPosition());
-                    for (int i = 0; i < fileSize; i++) {
-                        file.write(in.readByte());
-                    }
+                    FileChannel fileChannel = file.getChannel();
+                    fileChannel.position(fileMessage.getPosition());
+                    in.readBytes(fileChannel, fileSize);
                     file.close();
                 }
                 out.add(message);
