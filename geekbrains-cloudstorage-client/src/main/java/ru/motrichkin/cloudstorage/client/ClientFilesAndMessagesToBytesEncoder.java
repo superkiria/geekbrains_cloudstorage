@@ -35,6 +35,7 @@ public class ClientFilesAndMessagesToBytesEncoder extends MessageToByteEncoder {
             for (int i = 0; i < fileMessage.getLength(); i++) {
                 out.writeByte(file.readByte());
             }
+            file.close();
         } else {
             out.writeBytes(ZERO);
             out.writeBytes(data);

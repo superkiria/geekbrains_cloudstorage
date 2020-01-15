@@ -4,6 +4,7 @@ import ru.motrichkin.cloudstorage.utils.*;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class Interactions {
@@ -23,12 +24,16 @@ public class Interactions {
 
 
     public static void sendFile(String fileName) {
+        if (!Files.exists(Paths.get(fileName))) {
+            System.out.println("File doesn't exist");
+            return;
+        }
         try {
             RandomAccessFile file = new RandomAccessFile(fileName, "r");
             FileMessage fileMessage;
             long pos = 0;
             while (pos < file.length()) {
-                long increment = Math.min(256, file.length() - pos);
+                long increment = Math.min(1024, file.length() - pos);
                 fileMessage = new FileMessage(Paths.get(fileName), pos, increment, file.length());
                 Network.sendMessage(fileMessage);
                 pos += increment;

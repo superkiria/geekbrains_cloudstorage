@@ -43,12 +43,14 @@ public class FileMessage extends AbstractMessage implements ProcessingMessage {
 
     @Override
     public MessageProcessingResult processOnServer(MessageProcessingContext messageProcessingContext) {
-        return new MessageProcessingResult(new LogMessage(this.getFilename() + ": " + ((this.position + this.partLength) * 100 / this.fileSize) + "%"));
+        String message = this.getFilename() + ": " + ((this.position + this.partLength) * 100 / this.fileSize) + "%";
+        return new MessageProcessingResult(new LogMessage(message));
     }
 
     @Override
     public MessageProcessingResult processOnClient(MessageProcessingContext messageProcessingContext) {
-        System.out.println(this.getFilename() + ": " + ((this.position + this.partLength) * 100 / this.fileSize) + "%");
-        return new MessageProcessingResult(new LogMessage(this.getFilename() + ": " + ((this.position + this.partLength) * 100 / this.fileSize) + "%"));
+        String message = this.getFilename() + ": " + ((this.position + this.partLength) * 100 / this.fileSize) + "%";
+        System.out.println(message);
+        return new MessageProcessingResult(new LogMessage(message));
     }
 }
