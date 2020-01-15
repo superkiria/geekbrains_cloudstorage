@@ -27,7 +27,7 @@ public class FilesAndMessagesToBytesEncoder extends MessageToByteEncoder {
             FileMessage fileMessage = (FileMessage) message;
             RandomAccessFile file = new RandomAccessFile(fileMessage.getOperatingFolder() + "/" + fileMessage.getFilename(), "r");
             file.seek(fileMessage.getPosition());
-            byte[] fileSize = ByteBuffer.allocate(4).putInt((fileMessage.getLength())).array();
+            byte[] fileSize = ByteBuffer.allocate(4).putInt((int) (fileMessage.getLength())).array();
             out.writeBytes(fileSize);
             out.writeBytes(data);
             for (int i = 0; i < fileMessage.getLength(); i++) {

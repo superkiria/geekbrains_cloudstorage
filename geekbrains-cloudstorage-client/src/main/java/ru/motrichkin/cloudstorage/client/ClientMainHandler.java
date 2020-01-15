@@ -7,7 +7,7 @@ import ru.motrichkin.cloudstorage.utils.AbstractMessage;
 
 public class ClientMainHandler extends ChannelInboundHandlerAdapter {
     @Override
-    public void channelRead(ChannelHandlerContext channelHandlerContext, Object message) throws Exception {
+    public void channelRead(ChannelHandlerContext channelHandlerContext, Object message) {
         try {
             channelHandlerContext.writeAndFlush(ClientMessageProcessor.process((AbstractMessage) message));
         } finally {
@@ -16,7 +16,7 @@ public class ClientMainHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable cause) {
         cause.printStackTrace();
         channelHandlerContext.close();
     }

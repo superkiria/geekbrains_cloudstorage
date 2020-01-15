@@ -4,6 +4,8 @@ import ru.motrichkin.cloudstorage.utils.*;
 
 public class ClientMessageProcessor {
 
+    private static int processedCount = 0;
+
     public static MessageProcessingResult process(AbstractMessage incomingMessage) {
         ProcessingMessage processingMessage = (ProcessingMessage) incomingMessage;
         MessageProcessingContext messageProcessingContext = new MessageProcessingContext();
@@ -11,6 +13,11 @@ public class ClientMessageProcessor {
         if (messageProcessingResult.getNewToken() != null) {
             Network.setToken(messageProcessingResult.getNewToken());
         }
+        processedCount++;
         return messageProcessingResult;
+    }
+
+    public static int getProcessedCount() {
+        return processedCount;
     }
 }

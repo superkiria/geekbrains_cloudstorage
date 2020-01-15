@@ -5,8 +5,8 @@ import java.nio.file.Path;
 
 public class FileMessage extends AbstractMessage implements ProcessingMessage {
     private String filename;
-    private int position;
-    private int length;
+    private long position;
+    private long partLength;
     private long fileSize;
     private String operatingFolder;
 
@@ -14,27 +14,27 @@ public class FileMessage extends AbstractMessage implements ProcessingMessage {
         return filename;
     }
 
-    public FileMessage(Path path, int position, int length, long fileSize) throws IOException {
+    public FileMessage(Path path, long position, long partLength, long fileSize) throws IOException {
         filename = path.getFileName().toString();
         this.position = position;
-        this.length = length;
+        this.partLength = partLength;
         this.fileSize = fileSize;
     }
 
-    public FileMessage(Path path, int position, int length, long fileSize, String operatingFolder) throws IOException {
+    public FileMessage(Path path, long position, long partLength, long fileSize, String operatingFolder) throws IOException {
         filename = path.getFileName().toString();
         this.position = position;
-        this.length = length;
+        this.partLength = partLength;
         this.fileSize = fileSize;
         this.operatingFolder = operatingFolder;
     }
 
-    public int getPosition() {
+    public long getPosition() {
         return position;
     }
 
-    public int getLength() {
-        return length;
+    public long getLength() {
+        return partLength;
     }
 
     public String getOperatingFolder() {
@@ -43,12 +43,12 @@ public class FileMessage extends AbstractMessage implements ProcessingMessage {
 
     @Override
     public MessageProcessingResult processOnServer(MessageProcessingContext messageProcessingContext) {
-        return new MessageProcessingResult(new LogMessage(this.getFilename() + ": " + ((this.position + this.length) / (this.fileSize / 100)) + "%"));
+        return new MessageProcessingResult(new LogMessage(this.getFilename() + ": " + ((this.position + this.partLength) * 100 / this.fileSize) + "%"));
     }
 
     @Override
     public MessageProcessingResult processOnClient(MessageProcessingContext messageProcessingContext) {
-        System.out.println(this.getFilename() + ": " + ((this.position + this.length) / (this.fileSize / 100)) + "%");
-        return new MessageProcessingResult(new LogMessage(this.getFilename() + ": " + ((this.position + this.length) / (this.fileSize / 100)) + "%"));
+        System.out.println(this.getFilename() + ": " + ((this.position + this.partLength) * 100 / this.fileSize) + "%");
+        return new MessageProcessingResult(new LogMessage(this.getFilename() + ": " + ((this.position + this.partLength) * 100 / this.fileSize) + "%"));
     }
 }

@@ -10,7 +10,15 @@ public class Interactions {
 
     public static void authenticate(String login, String password) {
         AuthenticationMessage authenticationMessage = new AuthenticationMessage(login, password);
+        int oldProcessedCount = ClientMessageProcessor.getProcessedCount();
         Network.sendMessage(authenticationMessage);
+        while (oldProcessedCount >= ClientMessageProcessor.getProcessedCount()) {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -18,9 +26,9 @@ public class Interactions {
         try {
             RandomAccessFile file = new RandomAccessFile(fileName, "r");
             FileMessage fileMessage;
-            int pos = 0;
+            long pos = 0;
             while (pos < file.length()) {
-                int increment = Math.min(1024 * 1024, (int) file.length() - pos);
+                long increment = Math.min(256, file.length() - pos);
                 fileMessage = new FileMessage(Paths.get(fileName), pos, increment, file.length());
                 Network.sendMessage(fileMessage);
                 pos += increment;

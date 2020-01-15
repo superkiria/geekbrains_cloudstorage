@@ -18,7 +18,6 @@ public class Server {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             socketChannel.pipeline().addLast(
-                                    //new ObjectDecoder(5 * 1024 * 1024, ClassResolvers.cacheDisabled(null)),
                                     new BytesToFilesAndMessagesDecoder(),
                                     new FilesAndMessagesToBytesEncoder(),
                                     new MainHandler()
