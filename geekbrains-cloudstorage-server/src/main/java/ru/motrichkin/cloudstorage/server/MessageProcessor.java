@@ -1,6 +1,12 @@
 package ru.motrichkin.cloudstorage.server;
 
-import ru.motrichkin.cloudstorage.utils.*;
+import ru.motrichkin.cloudstorage.utils.messages.AbstractMessage;
+import ru.motrichkin.cloudstorage.utils.messages.AuthenticationMessage;
+import ru.motrichkin.cloudstorage.utils.messages.LogMessage;
+import ru.motrichkin.cloudstorage.utils.messages.TokenMessage;
+import ru.motrichkin.cloudstorage.utils.processing.MessageProcessingContext;
+import ru.motrichkin.cloudstorage.utils.processing.MessageProcessingResult;
+import ru.motrichkin.cloudstorage.utils.processing.ProcessingMessage;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,12 +19,16 @@ public class MessageProcessor {
 
     private static final String FOLDER = "server_storage/";
 
+    public static String getOperatingFolder() {
+        return FOLDER;
+    }
+
     public static AbstractMessage process(AbstractMessage incomingMessage) {
         if (incomingMessage.isAuthenticationMessage()) { // обрабатываем запросы на аутентификацию, отправляем клиенту токен
             AuthenticationMessage authenticationMessage = (AuthenticationMessage) incomingMessage;
             String token = null;
             try {
-                token = DatabaseServer.getToken(authenticationMessage.getLogin(), authenticationMessage.getPassword());
+                token = DatabaseServer.getDatabaseServer().getToken(authenticationMessage.getLogin(), authenticationMessage.getPassword());
             } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException e) {
                 e.printStackTrace();
                 return new LogMessage("Unexpected error");
@@ -30,16 +40,12 @@ public class MessageProcessor {
         }
 
         String operatingFolderPath;
-        try { // тут делаем аутентификацию отдельного сообщения по токену
-            String userFolderName = DatabaseServer.getFolderNameForToken(incomingMessage.getToken());
-            if (userFolderName == null) {
-                return new LogMessage("No authentication");
-            }
-            operatingFolderPath = FOLDER + userFolderName;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return new LogMessage("Unexpected error");
+        // тут делаем аутентификацию отдельного сообщения по токену
+        String userFolderName = DatabaseServer.getDatabaseServer().getFolderNameForToken(incomingMessage.getToken());
+        if (userFolderName == null) {
+            return new LogMessage("No authentication");
         }
+        operatingFolderPath = FOLDER + userFolderName;
 
         if (Files.notExists(Paths.get(operatingFolderPath))) { // если у юзера нет директории, то создаём
             try {

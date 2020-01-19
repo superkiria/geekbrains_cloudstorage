@@ -1,6 +1,6 @@
 package ru.motrichkin.cloudstorage.client;
 
-import ru.motrichkin.cloudstorage.utils.*;
+import ru.motrichkin.cloudstorage.utils.messages.*;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -33,7 +33,7 @@ public class Interactions {
             FileMessage fileMessage;
             long pos = 0;
             while (pos < file.length()) {
-                long increment = Math.min(1024, file.length() - pos);
+                long increment = Math.min(1024 * 1024, file.length() - pos);
                 fileMessage = new FileMessage(Paths.get(fileName), pos, increment, file.length());
                 Network.sendMessage(fileMessage);
                 pos += increment;

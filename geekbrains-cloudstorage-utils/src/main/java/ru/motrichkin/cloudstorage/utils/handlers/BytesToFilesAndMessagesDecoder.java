@@ -1,10 +1,11 @@
-package ru.motrichkin.cloudstorage.server;
+package ru.motrichkin.cloudstorage.utils.handlers;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
-import ru.motrichkin.cloudstorage.utils.FileMessage;
+import ru.motrichkin.cloudstorage.utils.AuthMaker;
+import ru.motrichkin.cloudstorage.utils.messages.FileMessage;
 
 import java.io.ByteArrayInputStream;
 import java.io.RandomAccessFile;
@@ -14,6 +15,18 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class BytesToFilesAndMessagesDecoder extends ByteToMessageDecoder {
+    private String operatingFolder;
+    private AuthMaker authMaker = null;
+
+    public BytesToFilesAndMessagesDecoder(String operatingFolder) {
+        this.operatingFolder = operatingFolder;
+    }
+
+    public BytesToFilesAndMessagesDecoder(String operatingFolder, AuthMaker authMaker) {
+        this.operatingFolder = operatingFolder;
+        this.authMaker = authMaker;
+    }
+
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         if (in.readableBytes() >= 8) {
@@ -26,24 +39,26 @@ public class BytesToFilesAndMessagesDecoder extends ByteToMessageDecoder {
                 Object message = (new ObjectDecoderInputStream(new ByteArrayInputStream(data))).readObject();
                 if (fileSize > 0) {
                     FileMessage fileMessage = (FileMessage) message;
-                    String filePath = "server_storage/" + DatabaseServer.getFolderNameForToken(fileMessage.getToken()) + "/" + fileMessage.getFilename();
+                    String filePath;
+                    if (authMaker != null) {
+                        filePath = operatingFolder + authMaker.getFolderNameForToken(fileMessage.getToken()) + "/" + fileMessage.getFilename();
+                    } else {
+                        filePath = operatingFolder + fileMessage.getFilename();
+                    }
                     if (fileMessage.getPosition() == 0) {
                         Files.deleteIfExists(Paths.get(filePath));
                     }
-                    RandomAccessFile file = new RandomAccessFile(filePath, "rw");
-                    FileChannel fileChannel = file.getChannel();
-                    fileChannel.position(fileMessage.getPosition());
-                    in.readBytes(fileChannel, fileSize);
-                    file.close();
+                    try (RandomAccessFile file = new RandomAccessFile(filePath, "rw")) {
+                        FileChannel fileChannel = file.getChannel();
+                        fileChannel.position(fileMessage.getPosition());
+                        in.readBytes(fileChannel, fileSize);
+                    }
                 }
                 out.add(message);
                 in.discardReadBytes();
             } else {
                 in.resetReaderIndex();
-                return;
             }
-        } else {
-            return;
         }
     }
 

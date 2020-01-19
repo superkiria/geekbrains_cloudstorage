@@ -7,7 +7,9 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import ru.motrichkin.cloudstorage.utils.AbstractMessage;
+import ru.motrichkin.cloudstorage.utils.handlers.BytesToFilesAndMessagesDecoder;
+import ru.motrichkin.cloudstorage.utils.handlers.FilesAndMessagesToBytesEncoder;
+import ru.motrichkin.cloudstorage.utils.messages.AbstractMessage;
 
 
 public class Network {
@@ -26,9 +28,11 @@ public class Network {
             @Override
             public void initChannel(SocketChannel ch) throws Exception {
                 ch.pipeline().addLast(
-                        new ClientBytesToFilesAndMessagesDecoder(),
-                        new ClientFilesAndMessagesToBytesEncoder(),
+                        new BytesToFilesAndMessagesDecoder(""),
+                        new FilesAndMessagesToBytesEncoder(),
+                        new TokenOutboundHandler(),
                         new ClientMainHandler()
+
                 );
             }
         });

@@ -3,7 +3,7 @@ package ru.motrichkin.cloudstorage.client;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
-import ru.motrichkin.cloudstorage.utils.AbstractMessage;
+import ru.motrichkin.cloudstorage.utils.messages.AbstractMessage;
 
 public class ClientMainHandler extends ChannelInboundHandlerAdapter {
     @Override

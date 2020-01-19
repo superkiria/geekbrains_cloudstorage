@@ -5,12 +5,14 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import ru.motrichkin.cloudstorage.utils.handlers.BytesToFilesAndMessagesDecoder;
+import ru.motrichkin.cloudstorage.utils.handlers.FilesAndMessagesToBytesEncoder;
 
 public class Server {
     public void run() throws Exception {
         EventLoopGroup mainGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        DatabaseServer.connect();
+        DatabaseServer.getDatabaseServer().connect();
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(mainGroup, workerGroup)
@@ -18,7 +20,7 @@ public class Server {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             socketChannel.pipeline().addLast(
-                                    new BytesToFilesAndMessagesDecoder(),
+                                    new BytesToFilesAndMessagesDecoder(MessageProcessor.getOperatingFolder(), DatabaseServer.getDatabaseServer()),
                                     new FilesAndMessagesToBytesEncoder(),
                                     new MainHandler()
                             );
@@ -30,7 +32,7 @@ public class Server {
         } finally {
             mainGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
-            DatabaseServer.disconnect();
+            DatabaseServer.getDatabaseServer().disconnect();
         }
     }
 
