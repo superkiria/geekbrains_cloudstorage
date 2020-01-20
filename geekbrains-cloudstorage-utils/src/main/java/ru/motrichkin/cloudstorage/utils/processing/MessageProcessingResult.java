@@ -1,4 +1,6 @@
-package ru.motrichkin.cloudstorage.utils;
+package ru.motrichkin.cloudstorage.utils.processing;
+
+import ru.motrichkin.cloudstorage.utils.messages.AbstractMessage;
 
 public class MessageProcessingResult {
 

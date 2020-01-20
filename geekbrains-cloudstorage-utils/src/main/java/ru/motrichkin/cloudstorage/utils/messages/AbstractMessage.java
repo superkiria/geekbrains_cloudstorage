@@ -1,4 +1,4 @@
-package ru.motrichkin.cloudstorage.utils;
+package ru.motrichkin.cloudstorage.utils.messages;
 
 import java.io.Serializable;
 

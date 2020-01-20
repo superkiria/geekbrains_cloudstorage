@@ -1,10 +1,10 @@
-package ru.motrichkin.cloudstorage.server;
+package ru.motrichkin.cloudstorage.utils.handlers;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
-import ru.motrichkin.cloudstorage.utils.FileMessage;
+import ru.motrichkin.cloudstorage.utils.messages.FileMessage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.RandomAccessFile;
@@ -25,19 +25,30 @@ public class FilesAndMessagesToBytesEncoder extends MessageToByteEncoder {
         out.writeBytes(size);
         if (message instanceof FileMessage) {
             FileMessage fileMessage = (FileMessage) message;
-            RandomAccessFile file = new RandomAccessFile(fileMessage.getOperatingFolder() + "/" + fileMessage.getFilename(), "r");
-            file.seek(fileMessage.getPosition());
-            byte[] fileSize = ByteBuffer.allocate(4).putInt((int) (fileMessage.getLength())).array();
-            out.writeBytes(fileSize);
-            out.writeBytes(data);
-            for (int i = 0; i < fileMessage.getLength(); i++) {
-                out.writeByte(file.readByte());
+            String filePath = "";
+            if (fileMessage.getOperatingFolder() != null && !fileMessage.getOperatingFolder().equals("")) {
+                filePath = fileMessage.getOperatingFolder() + "/";
             }
-            file.close();
+            filePath = filePath + fileMessage.getFilename();
+            try (RandomAccessFile file = new RandomAccessFile(filePath, "r")) {
+                file.seek(fileMessage.getPosition());
+                byte[] fileSize = ByteBuffer.allocate(4).putInt((int) (fileMessage.getLength())).array();
+                out.writeBytes(fileSize);
+                out.writeBytes(data);
+                for (int i = 0; i < fileMessage.getLength(); i++) {
+                    out.writeByte(file.readByte());
+                }
+            }
         } else {
             out.writeBytes(ZERO);
             out.writeBytes(data);
         }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable cause) throws Exception {
+        cause.printStackTrace();
+        channelHandlerContext.close();
     }
 
 }

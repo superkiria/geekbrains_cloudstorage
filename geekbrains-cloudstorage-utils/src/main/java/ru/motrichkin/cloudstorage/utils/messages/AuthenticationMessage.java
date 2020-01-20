@@ -1,4 +1,4 @@
-package ru.motrichkin.cloudstorage.utils;
+package ru.motrichkin.cloudstorage.utils.messages;
 
 public class AuthenticationMessage extends AbstractMessage {
 

@@ -1,4 +1,8 @@
-package ru.motrichkin.cloudstorage.utils;
+package ru.motrichkin.cloudstorage.utils.messages;
+
+import ru.motrichkin.cloudstorage.utils.processing.MessageProcessingContext;
+import ru.motrichkin.cloudstorage.utils.processing.MessageProcessingResult;
+import ru.motrichkin.cloudstorage.utils.processing.ProcessingMessage;
 
 public class TokenMessage extends AbstractMessage implements ProcessingMessage {
 

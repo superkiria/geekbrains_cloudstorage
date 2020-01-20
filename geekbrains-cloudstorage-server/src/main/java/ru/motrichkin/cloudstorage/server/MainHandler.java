@@ -3,7 +3,10 @@ package ru.motrichkin.cloudstorage.server;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
-import ru.motrichkin.cloudstorage.utils.*;
+import ru.motrichkin.cloudstorage.utils.messages.AbstractMessage;
+import ru.motrichkin.cloudstorage.utils.messages.FileMessage;
+import ru.motrichkin.cloudstorage.utils.messages.FileRequestMessage;
+import ru.motrichkin.cloudstorage.utils.messages.LogMessage;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -17,24 +20,20 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
             if (msg instanceof FileRequestMessage) {
                 // не нашёл, как обрабатывать это сообщение вне хэндлера, так как нужна возможность отправлять в ответ много сообщений
                 FileRequestMessage message = (FileRequestMessage) msg;
-                String operatingFolder = "server_storage/" + DatabaseServer.getFolderNameForToken(message.getToken());
+                String operatingFolder = "server_storage/" + DatabaseServer.getDatabaseServer().getFolderNameForToken(message.getToken());
                 String fileName = operatingFolder + "/" + message.getFilename();
                 if (Files.exists(Paths.get(fileName))) {
-                    RandomAccessFile file = null;
-                    try {
-                        file = new RandomAccessFile(fileName, "r");
+                    try (RandomAccessFile file = new RandomAccessFile(fileName, "r")) {
                         FileMessage fileMessage;
                         long pos = 0;
                         while (pos < file.length()) {
-                            long increment = Math.min(1024, file.length() - pos);
+                            long increment = Math.min(1024 * 1024, file.length() - pos);
                             fileMessage = new FileMessage(Paths.get(fileName), pos, increment, file.length(), operatingFolder);
                             channelHandlerContext.writeAndFlush(fileMessage);
                             pos += increment;
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
-                    } finally {
-                        file.close();
                     }
                 } else {
                     channelHandlerContext.writeAndFlush(new LogMessage("No such file found"));

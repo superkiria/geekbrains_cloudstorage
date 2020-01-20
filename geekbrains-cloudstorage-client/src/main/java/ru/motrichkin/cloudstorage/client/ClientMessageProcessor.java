@@ -1,6 +1,9 @@
 package ru.motrichkin.cloudstorage.client;
 
-import ru.motrichkin.cloudstorage.utils.*;
+import ru.motrichkin.cloudstorage.utils.messages.AbstractMessage;
+import ru.motrichkin.cloudstorage.utils.processing.MessageProcessingContext;
+import ru.motrichkin.cloudstorage.utils.processing.MessageProcessingResult;
+import ru.motrichkin.cloudstorage.utils.processing.ProcessingMessage;
 
 public class ClientMessageProcessor {
 
