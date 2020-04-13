@@ -14,13 +14,24 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class MainHandler extends ChannelInboundHandlerAdapter {
+
+    private final String mainOperatingFolder;
+    private final DatabaseServer databaseServer;
+    private final MessageProcessor messageProcessor;
+
+    public MainHandler(String mainOperatingFolder, DatabaseServer databaseServer, MessageProcessor messageProcessor) {
+        this.mainOperatingFolder = mainOperatingFolder;
+        this.databaseServer = databaseServer;
+        this.messageProcessor = messageProcessor;
+    }
+
     @Override
     public void channelRead(ChannelHandlerContext channelHandlerContext, Object msg) throws Exception {
         try {
             if (msg instanceof FileRequestMessage) {
                 // не нашёл, как обрабатывать это сообщение вне хэндлера, так как нужна возможность отправлять в ответ много сообщений
                 FileRequestMessage message = (FileRequestMessage) msg;
-                String operatingFolder = "server_storage/" + DatabaseServer.getDatabaseServer().getFolderNameForToken(message.getToken());
+                String operatingFolder = mainOperatingFolder + databaseServer.getFolderNameForToken(message.getToken());
                 String fileName = operatingFolder + "/" + message.getFilename();
                 if (Files.exists(Paths.get(fileName))) {
                     try (RandomAccessFile file = new RandomAccessFile(fileName, "r")) {
@@ -39,7 +50,7 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
                     channelHandlerContext.writeAndFlush(new LogMessage("No such file found"));
                 }
             } else {
-                channelHandlerContext.writeAndFlush(MessageProcessor.process((AbstractMessage) msg));
+                channelHandlerContext.writeAndFlush(messageProcessor.process((AbstractMessage) msg));
             }
         } finally {
             ReferenceCountUtil.release(msg);

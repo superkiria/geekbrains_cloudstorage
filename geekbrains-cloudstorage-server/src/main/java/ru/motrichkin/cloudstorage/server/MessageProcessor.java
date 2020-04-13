@@ -17,18 +17,24 @@ import java.sql.SQLException;
 
 public class MessageProcessor {
 
-    private static final String FOLDER = "server_storage/";
+    private final String FOLDER;
+    private final DatabaseServer databaseServer;
 
-    public static String getOperatingFolder() {
+    public MessageProcessor(String folder, DatabaseServer databaseServer) {
+        this.FOLDER = folder;
+        this.databaseServer = databaseServer;
+    }
+
+    public String getOperatingFolder() {
         return FOLDER;
     }
 
-    public static AbstractMessage process(AbstractMessage incomingMessage) {
+    public AbstractMessage process(AbstractMessage incomingMessage) {
         if (incomingMessage.isAuthenticationMessage()) { // обрабатываем запросы на аутентификацию, отправляем клиенту токен
             AuthenticationMessage authenticationMessage = (AuthenticationMessage) incomingMessage;
             String token = null;
             try {
-                token = DatabaseServer.getDatabaseServer().getToken(authenticationMessage.getLogin(), authenticationMessage.getPassword());
+                token = databaseServer.getToken(authenticationMessage.getLogin(), authenticationMessage.getPassword());
             } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException e) {
                 e.printStackTrace();
                 return new LogMessage("Unexpected error");
@@ -41,7 +47,7 @@ public class MessageProcessor {
 
         String operatingFolderPath;
         // тут делаем аутентификацию отдельного сообщения по токену
-        String userFolderName = DatabaseServer.getDatabaseServer().getFolderNameForToken(incomingMessage.getToken());
+        String userFolderName = databaseServer.getFolderNameForToken(incomingMessage.getToken());
         if (userFolderName == null) {
             return new LogMessage("No authentication");
         }
