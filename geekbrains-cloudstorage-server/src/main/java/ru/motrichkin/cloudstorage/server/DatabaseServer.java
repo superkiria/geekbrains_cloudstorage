@@ -4,41 +4,31 @@ import ru.motrichkin.cloudstorage.utils.AuthMaker;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.sql.DataSource;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Random;
 
 public class DatabaseServer implements AuthMaker {
-    private static DatabaseServer databaseServer = null;
 
+    private final DataSource dataSource;
     private Connection connection;
     private Statement statement;
     private Random random = new Random();
 
-    private final String DB_URL = "jdbc:h2:./main";
-    private final String DB_Driver = "org.h2.Driver";
-
-    private DatabaseServer() {
-    }
-
-    public static DatabaseServer getDatabaseServer() {
-        if (databaseServer == null) {
-            databaseServer = new DatabaseServer();
-        }
-        return databaseServer;
+    public DatabaseServer(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     public void connect() throws SQLException {
-        try {
-            Class.forName(DB_Driver);
-            connection = DriverManager.getConnection(DB_URL);
-            statement = connection.createStatement();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        connection = dataSource.getConnection();
+        statement = connection.createStatement();
     }
 
     public void disconnect() {

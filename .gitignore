@@ -4,6 +4,9 @@
 # No custom folders
 server_storage
 
+# No targets
+*/target
+
 # No DB
 *.db
 

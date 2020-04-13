@@ -1,7 +1,10 @@
 package ru.motrichkin.cloudstorage.server;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -9,10 +12,19 @@ import ru.motrichkin.cloudstorage.utils.handlers.BytesToFilesAndMessagesDecoder;
 import ru.motrichkin.cloudstorage.utils.handlers.FilesAndMessagesToBytesEncoder;
 
 public class Server {
+
+    private final MessageProcessor messageProcessor;
+    private final DatabaseServer databaseServer;
+
+    public Server(DatabaseServer databaseServer, MessageProcessor messageProcessor) {
+        this.databaseServer = databaseServer;
+        this.messageProcessor = messageProcessor;
+    }
+
     public void run() throws Exception {
         EventLoopGroup mainGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        DatabaseServer.getDatabaseServer().connect();
+        databaseServer.connect();
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(mainGroup, workerGroup)
@@ -20,9 +32,9 @@ public class Server {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             socketChannel.pipeline().addLast(
-                                    new BytesToFilesAndMessagesDecoder(MessageProcessor.getOperatingFolder(), DatabaseServer.getDatabaseServer()),
+                                    new BytesToFilesAndMessagesDecoder(messageProcessor.getOperatingFolder(), databaseServer),
                                     new FilesAndMessagesToBytesEncoder(),
-                                    new MainHandler()
+                                    new MainHandler(messageProcessor.getOperatingFolder(), databaseServer, messageProcessor)
                             );
                         }
                     })
@@ -32,12 +44,7 @@ public class Server {
         } finally {
             mainGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
-            DatabaseServer.getDatabaseServer().disconnect();
+            databaseServer.disconnect();
         }
     }
-
-    public static void main(String[] args) throws Exception {
-        new Server().run();
-    }
-
 }
